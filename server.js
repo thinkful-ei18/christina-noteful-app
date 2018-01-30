@@ -3,7 +3,7 @@
 const data = require('./db/notes');
 const express = require('express');
 const { PORT } = require('./config');
-const logger = require('./middleware');
+//const logger = require('./middleware');
 const simDB = require('./db/simDB');
 const notes = simDB.initialize(data);
 
@@ -12,41 +12,34 @@ const notes = simDB.initialize(data);
 
 const app = express();
 app.use(express.static('public'));
-app.use(logger);
+app.use(express.json());
+//app.use(logger);
 
 
-app.get('/v1/notes/:id', (req, res) => {
+app.get('/v1/notes/:id', (req, res, next) => {
   const { id } = req.params;
-  const passIdInt = parseInt(id);
-  const note = data.find(item => item.id === passIdInt);
-  res.json(note);
+  // const passIdInt = parseInt(id);
+  // const note = data.find(item => item.id === passIdInt);
+  // res.json(note);
+  notes.find(id, (err, item) => {
+    if (err) {
+      return next(err);
+    } 
+    res.json(item);
+  });
 });
 
 
 
 // search
 
-// app.get('/v1/notes', (req, res, next) => {
-//   const { searchTerm } = req.query;
-//   console.log(searchTerm);
-//   // search through /notes
-//   //let filterNotes = searchTerm ? data.filter(word => word.title.includes(searchTerm)) : data; 
-//   //res.json(filterNotes);
-//   //console.log(req.query);
-//   notes.filter(searchTerm, (err, list) => {
-//     if (err) {
-//       return next(err);
-//     } else {
-//       res.json(list);
-//       console.log('here');
-//     }
-//   });
-// });
-
 app.get('/v1/notes', (req, res, next) => {
-  console.log('test');
   const { searchTerm } = req.query;
-
+  console.log(searchTerm + ' searchTerm');
+  // search through /notes
+  //let filterNotes = searchTerm ? data.filter(word => word.title.includes(searchTerm)) : data; 
+  //res.json(filterNotes);
+  //console.log(req.query);
   notes.filter(searchTerm, (err, list) => {
     if (err) {
       return next(err);
@@ -56,7 +49,30 @@ app.get('/v1/notes', (req, res, next) => {
 });
 
 
+app.put('/v1/notes/:id', (req, res, next) => {
+  const id = req.params.id;
 
+  const updateObj = {};
+  const updateFields = ['title', 'content'];
+
+  updateFields.forEach(field => {
+    console.log(typeof req.body);
+    if (field in req.body) {
+      updateObj[field] = req.body[field];
+    }
+  });
+
+  notes.update(id, updateObj, (err, item) => {
+    if (err) {
+      return next(err);
+    }
+    if (item) {
+      res.json(item);
+    } else {
+      next();
+    }
+  });
+});
 
 
 app.use(function (req, res, next) {
