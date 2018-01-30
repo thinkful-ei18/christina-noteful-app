@@ -2,18 +2,16 @@
 
 const data = require('./db/notes');
 const express = require('express');
+const { PORT } = require('./config');
+const logger = require('./middleware');
 
 
 // INSERT EXPRESS APP CODE HERE...
 
 const app = express();
 app.use(express.static('public'));
+app.use(logger);
 
-
-
-// app.get('/v1/notes/hi', (req, res) => {
-//   res.send('ok');
-// });
 
 app.get('/v1/notes/:id', (req, res) => {
   const { id } = req.params;
@@ -36,7 +34,7 @@ app.get('/v1/notes', (req, res) => {
 
 
 
-app.listen(8080, function () {
+app.listen(PORT, function () {
   console.info(`server listening on ${this.address().port}`);
 }).on('error', err => {
   console.error(err);
