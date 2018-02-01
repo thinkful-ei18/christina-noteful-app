@@ -16,12 +16,13 @@ router.get('/notes/:id', (req, res, next) => {
   // const passIdInt = parseInt(id);
   // const note = data.find(item => item.id === passIdInt);
   // res.json(note);
-  notes.find(id, (err, item) => {
-    if (err) {
-      return next(err);
-    } 
-    res.json(item);
-  });
+  notes.find(id).then(item => {
+    if (item) {
+      res.json(item);
+    } else {
+      next();
+    }
+  }).catch(err => next(err));
 });
 
 // GET NOTES FILTERED SEARCH
@@ -31,12 +32,13 @@ router.get('/notes', (req, res, next) => {
   //let filterNotes = searchTerm ? data.filter(word => word.title.includes(searchTerm)) : data; 
   //res.json(filterNotes);
   //console.log(req.query);
-  notes.filter(searchTerm, (err, list) => {
-    if (err) {
-      return next(err);
+  notes.filter(searchTerm).then(item => {
+    if (item){
+      res.json(item);
+    } else {
+      next();
     }
-    res.json(list);
-  });
+  }).catch(err => next(err));
 });
 
 // UPDATE NOTE
@@ -53,16 +55,13 @@ router.put('/notes/:id', (req, res, next) => {
     }
   });
 
-  notes.update(id, updateObj, (err, item) => {
-    if (err) {
-      return next(err);
-    }
+  notes.update(id, updateObj).then(item => {
     if (item) {
       res.json(item);
     } else {
       next();
     }
-  });
+  }).catch(err => next(err));
 });
 
 // CREATE NEW NOTE
@@ -78,33 +77,26 @@ router.post('/notes/', (req, res, next) => {
   }
 
   // validated, now create note & catch fall through err
-  notes.create(newItem, (err, item) => {
-    if (err) {
-      return next(err);
-    }
+  notes.create(newItem).then(item => {
     if (item) {
       res.location(`http//${req.headers.host}/notes/${item.id}`).status(201).json(item);
     } else {
       next();
     }
-  });
-
+  }).catch(err => next(err));
 });
 
 // DELETE NOTE
 router.delete('/notes/:id', (req, res, next) => {
   const id = req.params.id;
 
-  notes.delete(id, (err, item) => {
-    if (err) {
-      return next(err);
-    }
+  notes.delete(id).then(item => {
     if (item) {
       res.json(item);
     } else {
       next();
     }
-  });
+  }).catch(err => next(err));
 });
 
 module.exports = router;
