@@ -33,6 +33,14 @@ const noteful = (function () {
     return id;
   }
 
+  function updateStoreAndRender(searchTerm) {
+    api.search(searchTerm)
+      .then(results => {
+        store.notes = results;
+        render();
+      });
+  }
+
   /**
    * EVENT LISTENERS AND HANDLERS
    */
@@ -80,25 +88,17 @@ const noteful = (function () {
         // if store contains id, update note
         api.update(noteObj.id, noteObj).then(results => {
           store.currentNote = results;
-          return api.search(store.currentSearchTerm); 
-        })
-          .then(results => {
-            store.notes = results;
-            render();
-          });
+          updateStoreAndRender(store.currentSearchTerm);
+        });
 
       } else {
         // else create new note
         api.create(noteObj).then(results => {
           store.currentNote = results;
-          return api.search(store.currentSearchTerm);
-        })
-          .then(results => {
-            store.notes = results;
-            render();
-
-          });
+          updateStoreAndRender(store.currentSearchTerm);
+        });
       }
+
     });
   }
 
@@ -116,30 +116,11 @@ const noteful = (function () {
 
       api.delete(noteId)
         .then(results => {
-          // MAKE SURE YOU RETURN THE RESULTS FROM API.SEARCH TO RESULTS FOR NEXT .THEN
-          return api.search(noteId);
-
-        }).then(results => {
-          console.log(results);
-          store.notes = results;
-          render();
+          updateStoreAndRender(noteId);
         });
-
-    // DELETE AT END OF DAY
-      // api.delete(noteId, updateAfterDelete => {
-
-      //   api.search(noteId, updateAfterDelete => {
-      //     store.notes = updateAfterDelete;
-      //     render();
-      //   });
-
-      // });
-
     });
   }
 
-
- 
   function bindEventListeners() {
     handleNoteItemClick();
     handleNoteSearchSubmit();
@@ -150,8 +131,9 @@ const noteful = (function () {
 
   // This object contains the only exposed methods from this module:
   return {
-    render: render,
-    bindEventListeners: bindEventListeners,
+    render,
+    bindEventListeners,
+    updateStoreAndRender,
   };
 
 }());
