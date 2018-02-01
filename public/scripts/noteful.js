@@ -116,6 +116,8 @@ const noteful = (function () {
 
       api.delete(noteId)
         .then(results => {
+          // UPDATED TO CLEAR DELTED NOTE FROM FORM
+          store.currentNote = false;
           updateStoreAndRender(noteId);
         });
     });
