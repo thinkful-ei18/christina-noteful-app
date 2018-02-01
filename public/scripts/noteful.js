@@ -42,8 +42,8 @@ const noteful = (function () {
 
       const noteId = getNoteIdFromElement(event.currentTarget);
 
-      api.details(noteId, response => {
-        store.currentNote = response;
+      api.details(noteId).then(results => {
+        store.currentNote = results;
         render();
       });
 
@@ -57,8 +57,8 @@ const noteful = (function () {
       const searchTerm = $('.js-note-search-entry').val();
       store.currentSearchTerm =  searchTerm ? { searchTerm } : {};
       
-      api.search(store.currentSearchTerm, response => {
-        store.notes = response;
+      api.search(store.currentSearchTerm).then(results => {
+        store.notes = results;
         render();
       });
     });
@@ -78,29 +78,27 @@ const noteful = (function () {
 
       if (store.currentNote.id) {
         // if store contains id, update note
-        api.update(noteObj.id, noteObj, updateResponse => {
-          store.currentNote = updateResponse;
-          //inside callback update store.notes
-          api.search(store.currentSearchTerm, updateResponse => {
-            store.notes = updateResponse;
+        api.update(noteObj.id, noteObj).then(results => {
+          store.currentNote = results;
+          return api.search(store.currentSearchTerm); 
+        })
+          .then(results => {
+            store.notes = results;
             render();
           });
-
-        });
 
       } else {
         // else create new note
-        api.create(noteObj, updateResponse => {
-          store.currentNote = updateResponse;
-
-          api.search(store.currentSearchTerm, updateResponse => {
-            store.notes = updateResponse;
+        api.create(noteObj).then(results => {
+          store.currentNote = results;
+          return api.search(store.currentSearchTerm);
+        })
+          .then(results => {
+            store.notes = results;
             render();
+
           });
-
-        });
       }
-
     });
   }
 
@@ -116,14 +114,26 @@ const noteful = (function () {
     $('.js-notes-list').on('click', '.js-note-delete-button', event => {
       const noteId = getNoteIdFromElement(event.currentTarget);
 
-      api.delete(noteId, updateAfterDelete => {
+      api.delete(noteId)
+        .then(results => {
+          // MAKE SURE YOU RETURN THE RESULTS FROM API.SEARCH TO RESULTS FOR NEXT .THEN
+          return api.search(noteId);
 
-        api.search(noteId, updateAfterDelete => {
-          store.notes = updateAfterDelete;
+        }).then(results => {
+          console.log(results);
+          store.notes = results;
           render();
         });
 
-      });
+    // DELETE AT END OF DAY
+      // api.delete(noteId, updateAfterDelete => {
+
+      //   api.search(noteId, updateAfterDelete => {
+      //     store.notes = updateAfterDelete;
+      //     render();
+      //   });
+
+      // });
 
     });
   }

@@ -4,10 +4,9 @@
 $(document).ready(function () {
   noteful.bindEventListeners();
 
-  api.search({}, response => {
-    store.notes = response;
+  api.search({}).then(results => {
+    store.notes = results;
     noteful.render();
   });
-
 
 });
