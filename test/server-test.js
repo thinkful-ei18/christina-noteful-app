@@ -1,3 +1,4 @@
+
 // CHAI.SPY() IS NOT A FUNCTION
 
 'use strict';
@@ -6,9 +7,11 @@ const app = require('../server');
 
 const chai = require('chai');
 const chaiHttp = require('chai-http');
+const spy = require('chai-spies');
 const expect = chai.expect;
 
 chai.use(chaiHttp);
+chai.use(spy);
 
 // REALITY CHECK TEST
 describe('Reality Check', function() {
@@ -41,7 +44,7 @@ describe('Express static', function() {
 describe('404 handler', function () {
 
   it('should respond with 404 when given a bad path', function () {
-    const spy = chai.spy;
+    const spy = chai.spy();
     return chai.request(app)
       .get('/bad/path')
       .then(spy)
@@ -67,6 +70,21 @@ describe('GET Request', function () {
         expect(res).to.have.status(200);
         expect(res.body.length).to.equal(10);
       });
+
+  });
+
+  it('should return a 404 if request ID does not exist', function () {
+    chai.request(app)
+      .get('/v1/notes/')
+      .then(function(res) {
+        const badID = 'whoopsie';
+        return chai.request(app)
+          .get(`/v1/notes/${badID}`)
+          .then(function(res) {
+            expect(res).to.have.status(404);
+          });
+      });
+
   });
 
   it('should return requested note by ID with GET request', function () {
@@ -82,6 +100,7 @@ describe('GET Request', function () {
             expect(res.body.id).to.deep.equal(id);
           });
       });
+
   });
 
   it('should return correct note on search', function () {
