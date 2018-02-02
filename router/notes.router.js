@@ -10,12 +10,9 @@ const data = require('../db/notes');
 const simDB = require('../db/simDB');
 const notes = simDB.initialize(data);
 
-// GET NOTES 
+// GET SPECIFIC NOTE 
 router.get('/notes/:id', (req, res, next) => {
   const { id } = req.params;
-  // const passIdInt = parseInt(id);
-  // const note = data.find(item => item.id === passIdInt);
-  // res.json(note);
   notes.find(id).then(item => {
     if (item) {
       res.json(item);
@@ -25,13 +22,9 @@ router.get('/notes/:id', (req, res, next) => {
   }).catch(err => next(err));
 });
 
-// GET NOTES FILTERED SEARCH
+// GET GENRAL NOTES && HANDLE NOTE SEARCH
 router.get('/notes', (req, res, next) => {
   const { searchTerm } = req.query;
-  // search through /notes
-  //let filterNotes = searchTerm ? data.filter(word => word.title.includes(searchTerm)) : data; 
-  //res.json(filterNotes);
-  //console.log(req.query);
   notes.filter(searchTerm).then(item => {
     if (item){
       res.json(item);
@@ -49,7 +42,6 @@ router.put('/notes/:id', (req, res, next) => {
   const updateFields = ['title', 'content'];
 
   updateFields.forEach(field => {
-    console.log(typeof req.body);
     if (field in req.body) {
       updateObj[field] = req.body[field];
     }

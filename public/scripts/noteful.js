@@ -33,8 +33,8 @@ const noteful = (function () {
     return id;
   }
 
-  function updateStoreAndRender(searchTerm) {
-    api.search(searchTerm)
+  function updateStoreAndRender(query) {
+    api.search(query)
       .then(results => {
         store.notes = results;
         render();
