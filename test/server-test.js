@@ -159,7 +159,7 @@ describe('POST Request', function () {
 describe('PUT Request', function () {
 
   it('should update note with PUT request', function () {
-    const updatedNote = {title:'Im updated', content: 'yay this is fun'};
+    const updatedNote = {title:'Im updated whee', content: 'yay this is fun'};
     return chai.request(app)
       .get('/v1/notes')
       .then(function (res) {
